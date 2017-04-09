@@ -504,7 +504,7 @@ def ParseVolumeID(LinkInfo,LinkInfoSize,VolumeIDOffset):
         return {}
     if VolumeIDOffset + 4 >= LinkInfoSize:
         return {}
-    VolumeIDSize = struct.unpack("L",LinkInfo[VolumeIDOffset:VolumeIDOffset+4])[0]
+    VolumeIDSize = struct.unpack("=L",LinkInfo[VolumeIDOffset:VolumeIDOffset+4])[0]
     
     if VolumeIDOffset + VolumeIDSize > LinkInfoSize:
         return {}
@@ -515,15 +515,15 @@ def ParseVolumeID(LinkInfo,LinkInfoSize,VolumeIDOffset):
     VolumeID = LinkInfo[VolumeIDOffset:VolumeIDOffset+VolumeIDSize]
 
     
-    DriveType_ = struct.unpack("L",VolumeID[4:8])[0]
+    DriveType_ = struct.unpack("=L",VolumeID[4:8])[0]
     #print "DriveType: " + hex(DriveType_) + " (" + GetDriveTypeString(DriveType_) +")"
     DictX["DriveType"] = DriveType_
 
-    DriveSerialNumber = struct.unpack("L",VolumeID[8:0xC])[0]
+    DriveSerialNumber = struct.unpack("=L",VolumeID[8:0xC])[0]
     #print "Drive SerialNo: " + hex(DriveSerialNumber) + " (" + PrintDriveSerialNumber(DriveSerialNumber) + ")"
     DictX["DriveSerialNumber"] = DriveSerialNumber
     
-    VolumeLabelOffset = struct.unpack("L",VolumeID[0xC:0x10])[0]
+    VolumeLabelOffset = struct.unpack("=L",VolumeID[0xC:0x10])[0]
     if VolumeLabelOffset >= VolumeIDSize:
         return {}
     #print hex(VolumeLabelOffset)
@@ -532,7 +532,7 @@ def ParseVolumeID(LinkInfo,LinkInfoSize,VolumeIDOffset):
     VolumeLabelOffsetUnicode_ = 0
     if VolumeLabelOffset == 0x14:
         VolumeLabelOffsetUnicode = True
-        VolumeLabelOffsetUnicode_ = struct.unpack("L",VolumeID[0x10:0x14])[0]
+        VolumeLabelOffsetUnicode_ = struct.unpack("=L",VolumeID[0x10:0x14])[0]
         if VolumeLabelOffsetUnicode_ > VolumeIDSize:
             return {}
     #print hex(VolumeLabelOffsetUnicode_)
@@ -560,27 +560,27 @@ def ParseCommonNetworkRelativeLink(LinkInfo,LinkInfoSize,CommonNetworkRelativeLi
 
     dictX["Type"] = "CommonNetworkRelativeLink"
     
-    CommonNetworkRelativeLinkSize = struct.unpack("L",LinkInfo[CommonNetworkRelativeLinkOffset:CommonNetworkRelativeLinkOffset+4])[0]
+    CommonNetworkRelativeLinkSize = struct.unpack("=L",LinkInfo[CommonNetworkRelativeLinkOffset:CommonNetworkRelativeLinkOffset+4])[0]
     
     if CommonNetworkRelativeLinkOffset + CommonNetworkRelativeLinkSize > LinkInfoSize:
         return {}
 
     Common = LinkInfo[CommonNetworkRelativeLinkOffset:CommonNetworkRelativeLinkOffset+CommonNetworkRelativeLinkSize]
     
-    CommonNetworkRelativeLinkFlags = struct.unpack("L",Common[4:8])[0]
+    CommonNetworkRelativeLinkFlags = struct.unpack("=L",Common[4:8])[0]
     #print "CommonNetworkRelativeLinkFlags: " + hex(CommonNetworkRelativeLinkFlags)
 
 
-    NetNameOffset = struct.unpack("L",Common[8:0xC])[0]
+    NetNameOffset = struct.unpack("=L",Common[8:0xC])[0]
     #print "NetNameOffset: " + hex(DriveSerialNumber)
 
     
-    DeviceNameOffset = struct.unpack("L",Common[0xC:0x10])[0]
+    DeviceNameOffset = struct.unpack("=L",Common[0xC:0x10])[0]
     if DeviceNameOffset >= CommonNetworkRelativeLinkSize:
         return ""
     #print "DeviceNameOffset: " + hex(VolumeLabelOffset)
 
-    NetworkProviderType = struct.unpack("L",Common[0x10:0x14])[0]
+    NetworkProviderType = struct.unpack("=L",Common[0x10:0x14])[0]
     #print "NetworkProviderType: " + hex(NetworkProviderType)
     dictX["NetworkProviderType"] = NetworkProviderType
     
@@ -588,7 +588,7 @@ def ParseCommonNetworkRelativeLink(LinkInfo,LinkInfoSize,CommonNetworkRelativeLi
     NetNameOffsetUnicode_ = 0
     if NetNameOffset > 0x14:
         NetNameOffsetUnicodeExists = True
-        NetNameOffsetUnicode_ = struct.unpack("L",Common[0x14:0x18])[0]
+        NetNameOffsetUnicode_ = struct.unpack("=L",Common[0x14:0x18])[0]
         if NetNameOffsetUnicode_ > CommonNetworkRelativeLinkSize:
             return {}
 
@@ -596,7 +596,7 @@ def ParseCommonNetworkRelativeLink(LinkInfo,LinkInfoSize,CommonNetworkRelativeLi
     DeviceNameOffsetUnicode_ = 0
     if NetNameOffset > 0x14:
         DeviceNameOffsetUnicodeExists = True
-        DeviceNameOffsetUnicode_ = struct.unpack("L",Common[0x18:0x1C])[0]
+        DeviceNameOffsetUnicode_ = struct.unpack("=L",Common[0x18:0x1C])[0]
         if DeviceNameOffsetUnicode_ > CommonNetworkRelativeLinkSize:
             return {}
     
@@ -643,15 +643,15 @@ def ParseLinkInfo(LinkInfo,LinkInfoSize,LinkInfoHeader,LinkInfoHeaderSize):
 
     #print "LinkInfoSize: " + hex(LinkInfoSize)
     #print "LinkInfoHeaderSize: " + hex(LinkInfoHeaderSize)
-    LinkInfoFlags = struct.unpack("L",LinkInfoHeader[0x8:0xC])[0]
+    LinkInfoFlags = struct.unpack("=L",LinkInfoHeader[0x8:0xC])[0]
     print "LinkInfoFlags: " + hex(LinkInfoFlags) + " (" + ParseLinkInfoFlags(LinkInfoFlags) + ")"
-    VolumeIDOffset = struct.unpack("L",LinkInfoHeader[0xC:0x10])[0]
+    VolumeIDOffset = struct.unpack("=L",LinkInfoHeader[0xC:0x10])[0]
     print "VolumeIDOffset: " + hex(VolumeIDOffset)
-    LocalBasePathOffset = struct.unpack("L",LinkInfoHeader[0x10:0x14])[0]
+    LocalBasePathOffset = struct.unpack("=L",LinkInfoHeader[0x10:0x14])[0]
     print "LocalBasePathOffset: " + hex(LocalBasePathOffset)
-    CommonNetworkRelativeLinkOffset = struct.unpack("L",LinkInfoHeader[0x14:0x18])[0]
+    CommonNetworkRelativeLinkOffset = struct.unpack("=L",LinkInfoHeader[0x14:0x18])[0]
     print "CommonNetworkRelativeLinkOffset: " + hex(CommonNetworkRelativeLinkOffset)
-    CommonPathSuffixOffset = struct.unpack("L",LinkInfoHeader[0x18:0x1C])[0]
+    CommonPathSuffixOffset = struct.unpack("=L",LinkInfoHeader[0x18:0x1C])[0]
     print "CommonPathSuffixOffset: " + hex(CommonPathSuffixOffset)
 
     LocalBasePathOffsetUnicode = False
@@ -659,11 +659,11 @@ def ParseLinkInfo(LinkInfo,LinkInfoSize,LinkInfoHeader,LinkInfoHeaderSize):
     LocalBasePathOffsetUnicode_ = 0
     CommonPathSuffixOffsetUnicode_ = 0
     if LinkInfoHeaderSize >= 0x20:
-        LocalBasePathOffsetUnicode_ = struct.unpack("L",LinkInfoHeader[0x1C:0x20])[0]
+        LocalBasePathOffsetUnicode_ = struct.unpack("=L",LinkInfoHeader[0x1C:0x20])[0]
         if LocalBasePathOffsetUnicode_ != 0:
             LocalBasePathOffsetUnicode = True
     if LinkInfoHeaderSize >= 0x24:
-        CommonPathSuffixOffsetUnicode_ = struct.unpack("L",LinkInfoHeader[0x20:0x24])[0]
+        CommonPathSuffixOffsetUnicode_ = struct.unpack("=L",LinkInfoHeader[0x20:0x24])[0]
         if CommonPathSuffixOffsetUnicode_ != 0:
             CommonPathSuffixOffsetUnicode = True
     print "LocalBasePathOffsetUnicode: " + hex(LocalBasePathOffsetUnicode_)
@@ -787,12 +787,12 @@ def ParseSerializedPropertyValueString(SerializedPropertyValue,SerializedPropert
         return ""
     if SerializedPropertyValueLen < 4:
         return ""
-    ValueSize = struct.unpack("L",SerializedPropertyValue[0:4])[0]
+    ValueSize = struct.unpack("=L",SerializedPropertyValue[0:4])[0]
     print "ValueSize: " + hex(ValueSize)
     i = 4
     if i > SerializedPropertyValueLen:
         return ""
-    NameSize = struct.unpack("L",SerializedPropertyValue[i:i+4])[0]
+    NameSize = struct.unpack("=L",SerializedPropertyValue[i:i+4])[0]
     print "NameSize: " + hex(NameSize)
     i += 4
     if (ValueSize + NameSize + 9) > SerializedPropertyValueLen:
@@ -818,12 +818,12 @@ def ParseSerializedPropertyValueInteger(SerializedPropertyValue,SerializedProper
         return ""
     if SerializedPropertyValueLen < 4:
         return ""
-    ValueSize = struct.unpack("L",SerializedPropertyValue[0:4])[0]
+    ValueSize = struct.unpack("=L",SerializedPropertyValue[0:4])[0]
     print "ValueSize: " + hex(ValueSize)
     i = 4
     if i > SerializedPropertyValueLen:
         return ""
-    PropertyId = struct.unpack("L",SerializedPropertyValue[i:i+4])[0]
+    PropertyId = struct.unpack("=L",SerializedPropertyValue[i:i+4])[0]
     print "PropertyId: " + hex(PropertyId)
     i += 4
 
@@ -870,7 +870,7 @@ def ParsePropertyStore(PropertyStore,PropertyStoreSize):
     while TerminalFound == False and i < PropertyStoreSize:
         Prop = ""
         if i + 4 <= PropertyStoreSize:
-            StorageSize = struct.unpack("L",PropertyStore[i:i+4])[0]
+            StorageSize = struct.unpack("=L",PropertyStore[i:i+4])[0]
             i += 4
             print "StoreSize: " + hex(StorageSize)
             if StorageSize == 0:
@@ -878,7 +878,7 @@ def ParsePropertyStore(PropertyStore,PropertyStoreSize):
                 TerminalFound = True
                 break
         if i + 0x14 <= PropertyStoreSize:
-            Version = struct.unpack("L",PropertyStore[i:i+4])[0]
+            Version = struct.unpack("=L",PropertyStore[i:i+4])[0]
             i += 4
             print "Version: " + hex(Version)
             if Version != 0x53505331:
@@ -942,7 +942,7 @@ def ParseKnownFolderDataBlock(DataBlock,DataBlockSize):
     print Str
     FStr += (Str + "\r\n")
 
-    Offset = hex(struct.unpack("L",DataBlock[i:i+4])[0])
+    Offset = hex(struct.unpack("=L",DataBlock[i:i+4])[0])
     i += 4
     #This should be matched with LinkTargetIDList
     Str = ( "Offset: " + Offset )
@@ -1021,13 +1021,13 @@ def ParseSpecialFolderDataBlock(DataBlock,DataBlockSize):
     i = 8
     FStr = ""
     
-    FolderId = hex(struct.unpack("L",DataBlock[i:i+4])[0])
+    FolderId = hex(struct.unpack("=L",DataBlock[i:i+4])[0])
     i += 4
     Str = ( "FolderId: " + FolderId )
     print Str
     FStr += (Str + "\r\n")
 
-    LinkTargetIDListOffset = hex(struct.unpack("L",DataBlock[i:i+4])[0])
+    LinkTargetIDListOffset = hex(struct.unpack("=L",DataBlock[i:i+4])[0])
     i += 4
     #This should be matched with LinkTargetIDList
     Str = ( "LinkTargetIDListOffset: " + LinkTargetIDListOffset )
@@ -1045,7 +1045,7 @@ def ParseConsoleFEDataBlock(DataBlock,DataBlockSize):
         return ""
     i = 8
     
-    CodePage = hex(struct.unpack("L",DataBlock[i:i+4])[0])
+    CodePage = hex(struct.unpack("=L",DataBlock[i:i+4])[0])
     i += 4
     FStr = ( "CodePage: " + (CodePage) )
     print FStr
@@ -1067,13 +1067,13 @@ def ParseTrackerDataBlock(DataBlock,DataBlockSize):
         return ""
     i = 8
     
-    Length = struct.unpack("L",DataBlock[i:i+4])[0]
+    Length = struct.unpack("=L",DataBlock[i:i+4])[0]
     i += 4
     if Length < 0x58:
         return ""
     FStr = ""
     
-    Version = struct.unpack("L",DataBlock[i:i+4])[0]
+    Version = struct.unpack("=L",DataBlock[i:i+4])[0]
     i += 4
     Str =  ("Version: " + hex(Version))
     print Str
@@ -1213,34 +1213,34 @@ def ParseConsoleDataBlock(DataBlock,DataBlockSize):
     print Str
     FStr += (Str + "\r\n")
     
-    Unused1 = struct.unpack("L",DataBlock[i:i+4])[0]
+    Unused1 = struct.unpack("=L",DataBlock[i:i+4])[0]
     i += 4
     Str = ("Unused1: " + hex(Unused1))
     print Str
     FStr += (Str + "\r\n")
     
     
-    Unused2 = struct.unpack("L",DataBlock[i:i+4])[0]
+    Unused2 = struct.unpack("=L",DataBlock[i:i+4])[0]
     i += 4
     Str = ( "Unused2: " + hex(Unused2) )
     print Str
     FStr += (Str + "\r\n")
     
     
-    FontSize = struct.unpack("L",DataBlock[i:i+4])[0]
+    FontSize = struct.unpack("=L",DataBlock[i:i+4])[0]
     i += 4
     Str = ( "FontSize: " + hex(FontSize) )
     print Str
     FStr += (Str + "\r\n")
     
-    FontFamily = struct.unpack("L",DataBlock[i:i+4])[0]
+    FontFamily = struct.unpack("=L",DataBlock[i:i+4])[0]
     i += 4
     Str = ( "FontFamily: " + hex(FontFamily) + " (" + GetFontFamilyString(FontFamily) + ")" )
     print Str
     FStr += (Str + "\r\n")
     
     
-    FontWeight = struct.unpack("L",DataBlock[i:i+4])[0]
+    FontWeight = struct.unpack("=L",DataBlock[i:i+4])[0]
     i += 4
     sFontWeight = ""
     if FontWeight <= 700:
@@ -1258,7 +1258,7 @@ def ParseConsoleDataBlock(DataBlock,DataBlockSize):
     print Str
     FStr += (Str + "\r\n")
     
-    CursorSize = struct.unpack("L",DataBlock[i:i+4])[0]
+    CursorSize = struct.unpack("=L",DataBlock[i:i+4])[0]
     i += 4
     sCursorSize = ""
     if CursorSize <= 25:
@@ -1273,7 +1273,7 @@ def ParseConsoleDataBlock(DataBlock,DataBlockSize):
     print Str
     FStr += (Str + "\r\n")
     
-    FullScreen = struct.unpack("L",DataBlock[i:i+4])[0]
+    FullScreen = struct.unpack("=L",DataBlock[i:i+4])[0]
     i += 4
     sFullScreen = "Off"
     if FullScreen != 0:
@@ -1282,7 +1282,7 @@ def ParseConsoleDataBlock(DataBlock,DataBlockSize):
     print Str
     FStr += (Str + "\r\n")
     
-    QuickEdit = struct.unpack("L",DataBlock[i:i+4])[0]
+    QuickEdit = struct.unpack("=L",DataBlock[i:i+4])[0]
     i += 4
     sQuickEdit = "Off"
     if QuickEdit != 0:
@@ -1292,7 +1292,7 @@ def ParseConsoleDataBlock(DataBlock,DataBlockSize):
     FStr += (Str + "\r\n")
     
     
-    InsertMode = struct.unpack("L",DataBlock[i:i+4])[0]
+    InsertMode = struct.unpack("=L",DataBlock[i:i+4])[0]
     i += 4
     sInsertMode = "Off"
     if InsertMode != 0:
@@ -1301,7 +1301,7 @@ def ParseConsoleDataBlock(DataBlock,DataBlockSize):
     print Str
     FStr += (Str + "\r\n")
     
-    AutoPosition = struct.unpack("L",DataBlock[i:i+4])[0]
+    AutoPosition = struct.unpack("=L",DataBlock[i:i+4])[0]
     i += 4
     sAutoPosition = "Off"
     if AutoPosition != 0:
@@ -1310,19 +1310,19 @@ def ParseConsoleDataBlock(DataBlock,DataBlockSize):
     print Str
     FStr += (Str + "\r\n")
     
-    HistoryBufferSize = struct.unpack("L",DataBlock[i:i+4])[0]
+    HistoryBufferSize = struct.unpack("=L",DataBlock[i:i+4])[0]
     i += 4
     Str = ( "HistoryBufferSize: " + hex(HistoryBufferSize) )
     print Str
     FStr += (Str + "\r\n")
     
-    NumberOfHistoryBuffers = struct.unpack("L",DataBlock[i:i+4])[0]
+    NumberOfHistoryBuffers = struct.unpack("=L",DataBlock[i:i+4])[0]
     i += 4
     Str = ( "NumberOfHistoryBuffers: " + hex(NumberOfHistoryBuffers) )
     print Str
     FStr += (Str + "\r\n")
     
-    HistoryNoDup = struct.unpack("L",DataBlock[i:i+4])[0]
+    HistoryNoDup = struct.unpack("=L",DataBlock[i:i+4])[0]
     i += 4
     sHistoryNoDup = "Duplicates not allowed"
     if HistoryNoDup != 0:
@@ -1501,7 +1501,8 @@ if fConLen == 0 or fConLen < 0x4C:
 
 ########################################################################
 #Read ShellLinkHeader
-HeaderSize = struct.unpack("L",fCon[0:4])[0]
+
+HeaderSize = struct.unpack("=L", fCon[0:4])[0]
 if HeaderSize != 0x4C:
     PrintInvalidHeaderError()
 
@@ -1510,7 +1511,7 @@ LinkCLSID = ShellLinkHeader[0x4:0x14]
 sLinkCLSID = PrintCLSID(LinkCLSID)
 print "Link CLSID: " + sLinkCLSID + "\r\n"
 
-LinkFlags = struct.unpack("L",ShellLinkHeader[0x14:0x18])[0]
+LinkFlags = struct.unpack("=L",ShellLinkHeader[0x14:0x18])[0]
 print "Link Flags: " + hex(LinkFlags) + " (" + ParseLinkFlags(LinkFlags) + ")\r\n"
 
 
@@ -1596,7 +1597,7 @@ if LinkFlags & 0x4000000:
 
 
 
-FileAttributes = struct.unpack("L",ShellLinkHeader[0x18:0x1C])[0]
+FileAttributes = struct.unpack("=L",ShellLinkHeader[0x18:0x1C])[0]
 print "Target File Attributes: " + hex(FileAttributes) + " (" + ParseFileAttributes(FileAttributes)+ ")"
 
 
@@ -1607,13 +1608,13 @@ print "Access Time: " + str( PrintFileTime(AccessTime) )
 WriteTime = ShellLinkHeader[0x2C:0x34]
 print "Write Time: " + str( PrintFileTime(WriteTime) )
 
-FileSize = struct.unpack("L",ShellLinkHeader[0x34:0x38])[0]
+FileSize = struct.unpack("=L",ShellLinkHeader[0x34:0x38])[0]
 print "File Size: " + str(FileSize) + " (" + hex(FileSize) + ") bytes"
 
-IconIndex = struct.unpack("L",ShellLinkHeader[0x38:0x3C])[0]
+IconIndex = struct.unpack("=L",ShellLinkHeader[0x38:0x3C])[0]
 print "Icon Index: " + hex(IconIndex)
 
-ShowCommand = struct.unpack("L",ShellLinkHeader[0x3C:0x40])[0]
+ShowCommand = struct.unpack("=L",ShellLinkHeader[0x3C:0x40])[0]
 print "ShowCommand: " + PrintShowCommand(IconIndex)
 
 HotKeyFlags = ShellLinkHeader[0x40:0x42]
@@ -1655,14 +1656,14 @@ if gHasLinkInfo == True:
     print "\r\n=========== \r\nNow parsing LinkInfo\r\n"
     if fConLen < Next+4:
         PrintSmallError()
-    LinkInfoSize = struct.unpack("L",fCon[Next:Next+0x4])[0]
+    LinkInfoSize = struct.unpack("=L",fCon[Next:Next+0x4])[0]
     #print hex(Next)
     #print hex(LinkInfoSize)
     if fConLen < Next + LinkInfoSize:
         PrintSmallError()
     LinkInfo = fCon[Next:Next+LinkInfoSize]
     Next += LinkInfoSize
-    LinkInfoHeaderSize = struct.unpack("L",LinkInfo[4:8])[0]
+    LinkInfoHeaderSize = struct.unpack("=L",LinkInfo[4:8])[0]
     if LinkInfoHeaderSize >= LinkInfoSize:
         PrintSmallError()
     LinkInfoHeader = LinkInfo[0:LinkInfoHeaderSize]
@@ -1859,7 +1860,7 @@ while TerminalBlockFound == False:
     #print "Next: " + hex(Next)
     if fConLen < Next + 4:
         PrintSmallError()
-    BlockSize = struct.unpack("L",fCon[Next:Next+4])[0]
+    BlockSize = struct.unpack("=L",fCon[Next:Next+4])[0]
     #print "Block Size: " + hex(BlockSize)
     #Check for Terminal Block
     if BlockSize == 0:
@@ -1870,7 +1871,7 @@ while TerminalBlockFound == False:
     if fConLen < Next + BlockSize:
         PrintSmallError()
     
-    BlockSignature = struct.unpack("L",fCon[Next+4:Next+8])[0]
+    BlockSignature = struct.unpack("=L",fCon[Next+4:Next+8])[0]
     print "Block Signaure: " + hex(BlockSignature) + " (" + GetNameFromSignatureId(BlockSignature) + ")"
     #print GetNameFromSignatureId(BlockSignature)
 
