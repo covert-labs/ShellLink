@@ -821,9 +821,9 @@ def ParseSerializedPropertyValueInteger(SerializedPropertyValue,SerializedProper
     ValueSize = struct.unpack("=L",SerializedPropertyValue[0:4])[0]
     print "ValueSize: " + hex(ValueSize)
     i = 4
-    if i > SerializedPropertyValueLen:
+    if i > SerializedPropertyValueLen or len(SerializedPropertyValue[i:i+4]) != 4:
         return ""
-    PropertyId = struct.unpack("=L",SerializedPropertyValue[i:i+4])[0]
+    PropertyId = struct.unpack("=L", SerializedPropertyValue[i:i+4])[0]
     print "PropertyId: " + hex(PropertyId)
     i += 4
 
@@ -1481,409 +1481,410 @@ def ParseLinkFlags(LinkFlags):
 #-------------------------------------------
 #-------------------------------------------
 
+if __name__ == '__main__':
 
-if len(sys.argv) != 2:
-    PrintFatalError("Usage: Lnk.py X.lnk\r\n",-1)
+    if len(sys.argv) != 2:
+        PrintFatalError("Usage: Lnk.py X.lnk\r\n",-1)
 
-inF = sys.argv[1]
-if os.path.exists(inF) == False:
-    PrintFatalError("Input file does not exist\r\n",-2)
-
-
-
-fIn = open(inF,"rb")
-fCon = fIn.read()
-fIn.close()
-
-fConLen = len(fCon)
-if fConLen == 0 or fConLen < 0x4C:
-    PrintSmallError()
-
-########################################################################
-#Read ShellLinkHeader
-
-HeaderSize = struct.unpack("=L", fCon[0:4])[0]
-if HeaderSize != 0x4C:
-    PrintInvalidHeaderError()
-
-ShellLinkHeader = fCon[0:0x4C]
-LinkCLSID = ShellLinkHeader[0x4:0x14]
-sLinkCLSID = PrintCLSID(LinkCLSID)
-print "Link CLSID: " + sLinkCLSID + "\r\n"
-
-LinkFlags = struct.unpack("=L",ShellLinkHeader[0x14:0x18])[0]
-print "Link Flags: " + hex(LinkFlags) + " (" + ParseLinkFlags(LinkFlags) + ")\r\n"
+    inF = sys.argv[1]
+    if os.path.exists(inF) == False:
+        PrintFatalError("Input file does not exist\r\n",-2)
 
 
-gHasLinkTargetIDList=False
-gHasLinkInfo=False
-gHasName=False
-gHasRelativePath=False
-gHasWorkingDir=False
-gHasArguments=False
-gHasIconLocation=False
-gIsUnicode = False
-gForceNoLinkInfo = False
-gHasExpString = False
-gRunInSeparateProcess = False
-gHasDarwinID = False
-gRunAsUser = False
-gHasExpIcon = False
-gNoPidlAlias = False
-gRunWithShimLayer = False
-gForceNoLinkTrack = False
-gEnableTargetMetadata = False
-gDisableLinkPathTracking = False
-gDisableKnownFolderTracking = False
-gDisableKnownFolderAlias = False
-gAllowLinkToLink = False
-gUnaliasOnSave = False
-gPreferEnvironmentPath = False
-gKeepLocalIDListForUNCTarget = False
+
+    fIn = open(inF,"rb")
+    fCon = fIn.read()
+    fIn.close()
+
+    fConLen = len(fCon)
+    if fConLen == 0 or fConLen < 0x4C:
+        PrintSmallError()
+
+    ########################################################################
+    #Read ShellLinkHeader
+
+    HeaderSize = struct.unpack("=L", fCon[0:4])[0]
+    if HeaderSize != 0x4C:
+        PrintInvalidHeaderError()
+
+    ShellLinkHeader = fCon[0:0x4C]
+    LinkCLSID = ShellLinkHeader[0x4:0x14]
+    sLinkCLSID = PrintCLSID(LinkCLSID)
+    print "Link CLSID: " + sLinkCLSID + "\r\n"
+
+    LinkFlags = struct.unpack("=L",ShellLinkHeader[0x14:0x18])[0]
+    print "Link Flags: " + hex(LinkFlags) + " (" + ParseLinkFlags(LinkFlags) + ")\r\n"
 
 
-if LinkFlags & 0x1:
-    gHasLinkTargetIDList = True
-if LinkFlags & 0x2:
-    gHasLinkInfo = True
-if LinkFlags & 0x4:
-    gHasName = True
-if LinkFlags & 0x8:
-    gHasRelativePath = True
-if LinkFlags & 0x10:
-    gHasWorkingDir = True
-if LinkFlags & 0x20:
-    gHasArguments = True
-if LinkFlags & 0x40:
-    gHasIconLocation = True
-if LinkFlags & 0x80:
-    gIsUnicode = True
-
-if LinkFlags & 0x100:
+    gHasLinkTargetIDList=False
+    gHasLinkInfo=False
+    gHasName=False
+    gHasRelativePath=False
+    gHasWorkingDir=False
+    gHasArguments=False
+    gHasIconLocation=False
+    gIsUnicode = False
     gForceNoLinkInfo = False
-if LinkFlags & 0x200:
     gHasExpString = False
-if LinkFlags & 0x400:
     gRunInSeparateProcess = False
-
-if LinkFlags & 0x1000:
     gHasDarwinID = False
-if LinkFlags & 0x2000:
     gRunAsUser = False
-if LinkFlags & 0x4000:
     gHasExpIcon = False
-if LinkFlags & 0x8000:
     gNoPidlAlias = False
-if LinkFlags & 0x20000:
     gRunWithShimLayer = False
-if LinkFlags & 0x40000:
     gForceNoLinkTrack = False
-if LinkFlags & 0x80000:
     gEnableTargetMetadata = False
-if LinkFlags & 0x100000:
     gDisableLinkPathTracking = False
-if LinkFlags & 0x200000:
     gDisableKnownFolderTracking = False
-if LinkFlags & 0x400000:
     gDisableKnownFolderAlias = False
-if LinkFlags & 0x800000:
     gAllowLinkToLink = False
-if LinkFlags & 0x1000000:
     gUnaliasOnSave = False
-if LinkFlags & 0x2000000:
     gPreferEnvironmentPath = False
-if LinkFlags & 0x4000000:
     gKeepLocalIDListForUNCTarget = False
 
 
+    if LinkFlags & 0x1:
+        gHasLinkTargetIDList = True
+    if LinkFlags & 0x2:
+        gHasLinkInfo = True
+    if LinkFlags & 0x4:
+        gHasName = True
+    if LinkFlags & 0x8:
+        gHasRelativePath = True
+    if LinkFlags & 0x10:
+        gHasWorkingDir = True
+    if LinkFlags & 0x20:
+        gHasArguments = True
+    if LinkFlags & 0x40:
+        gHasIconLocation = True
+    if LinkFlags & 0x80:
+        gIsUnicode = True
 
-FileAttributes = struct.unpack("=L",ShellLinkHeader[0x18:0x1C])[0]
-print "Target File Attributes: " + hex(FileAttributes) + " (" + ParseFileAttributes(FileAttributes)+ ")"
+    if LinkFlags & 0x100:
+        gForceNoLinkInfo = False
+    if LinkFlags & 0x200:
+        gHasExpString = False
+    if LinkFlags & 0x400:
+        gRunInSeparateProcess = False
 
-
-CreationTime = ShellLinkHeader[0x1C:0x24]
-print "Creation Time: " + str( PrintFileTime(CreationTime) )
-AccessTime = ShellLinkHeader[0x24:0x2C]
-print "Access Time: " + str( PrintFileTime(AccessTime) )
-WriteTime = ShellLinkHeader[0x2C:0x34]
-print "Write Time: " + str( PrintFileTime(WriteTime) )
-
-FileSize = struct.unpack("=L",ShellLinkHeader[0x34:0x38])[0]
-print "File Size: " + str(FileSize) + " (" + hex(FileSize) + ") bytes"
-
-IconIndex = struct.unpack("=L",ShellLinkHeader[0x38:0x3C])[0]
-print "Icon Index: " + hex(IconIndex)
-
-ShowCommand = struct.unpack("=L",ShellLinkHeader[0x3C:0x40])[0]
-print "ShowCommand: " + PrintShowCommand(IconIndex)
-
-HotKeyFlags = ShellLinkHeader[0x40:0x42]
-print "HotKey flags: " + ParseHotKeyFlags(HotKeyFlags)
-
-Reserved1 = ShellLinkHeader[0x42:0x44]
-Reserved2 = ShellLinkHeader[0x44:0x48]
-Reserved3 = ShellLinkHeader[0x48:0x4C]
-
-########################################################################
-#Read LinkTargetIDList
-Next = 0x4C
-if gHasLinkTargetIDList == True:
-    print "\r\n=========== \r\nNow parsing TargetLinkIDList\r\n"
-    if fConLen < Next+2:
-        PrintSmallError()
-    IDListSize = struct.unpack("H",fCon[Next:Next+0x2])[0]
-    if  Next + IDListSize > fConLen:
-        PrintSmallError()
-    print "IDListSize: " + hex(IDListSize) + "\r\n"
-    Next += 2
-    IDList = fCon[Next:Next+IDListSize]
-    IDs =  ParseIDList(IDList,IDListSize)
-    if IDs == []:
-        PrintFatalError("Error parsing TargetLinkIDList\r\n",-6)
-    #print IDs
-    for _ID_ in IDs:
-        x_x_x = _ID_.split("!!!")
-        if len(x_x_x) == 4:
-            print "ItemID Offset: "  + hex(int(x_x_x[0],10))
-            print "ItemID Size: "  + hex(int(x_x_x[1],10))
-            print "ItemID Type: "  + x_x_x[2]
-            print "ItemID Value: " + x_x_x[3]
-            print "\r\n"
-    Next += IDListSize
-########################################################################
-#Read LinkInfo 
-if gHasLinkInfo == True:
-    print "\r\n=========== \r\nNow parsing LinkInfo\r\n"
-    if fConLen < Next+4:
-        PrintSmallError()
-    LinkInfoSize = struct.unpack("=L",fCon[Next:Next+0x4])[0]
-    #print hex(Next)
-    #print hex(LinkInfoSize)
-    if fConLen < Next + LinkInfoSize:
-        PrintSmallError()
-    LinkInfo = fCon[Next:Next+LinkInfoSize]
-    Next += LinkInfoSize
-    LinkInfoHeaderSize = struct.unpack("=L",LinkInfo[4:8])[0]
-    if LinkInfoHeaderSize >= LinkInfoSize:
-        PrintSmallError()
-    LinkInfoHeader = LinkInfo[0:LinkInfoHeaderSize]
-    ret = ParseLinkInfo(LinkInfo,LinkInfoSize,LinkInfoHeader,LinkInfoHeaderSize)
-    #print ret
-    if ret == []:
-        print "Empty LinkInfo section\r\n"
-    else:
-        for _ret_ in ret:
-            if _ret_ != {}:
-                if _ret_["Type"]!="":
-                    if _ret_["Type"] == "Volume":
-                        print "== Volume ==>\r\n"
-                        if _ret_["DriveType"] != "":
-                            xDT = _ret_["DriveType"]
-                            print "Drive Type: " + hex(xDT) + " (" + GetDriveTypeString(xDT) +")"
-                        if _ret_["VolumeA"] != "":
-                            print "Drive Name: " + _ret_["VolumeA"]
-                        if _ret_["VolumeU"] != "":
-                            print "Drive Name: " + _ret_["VolumeA"]
-                        if _ret_["DriveSerialNumber"] != "":
-                            xDSN = _ret_["DriveSerialNumber"]
-                            print "Drive SerialNo: " + hex(xDSN) + " (" + PrintDriveSerialNumber(xDSN) + ")"
-                    elif _ret_["Type"] == "LocalBasePath":
-                        print "== LocalBasePath ==>\r\n"
-                        if _ret_["LocalBasePathA"] != "":
-                            print "LocalBasePath: " + _ret_["LocalBasePathA"]
-                        if _ret_["LocalBasePathU"] != "":
-                            print "LocalBasePath: " + _ret_["LocalBasePathU"]
-                    elif _ret_["Type"] == "CommonNetworkRelativeLink":
-                        print "== CommonNetworkRelativeLink ==>\r\n"
-                        if _ret_["NetworkProviderType"] != 0:
-                            print "Network Provider: " + GetNetworkProviderString(NetworkProviderType)
-                        if _ret_["NetNameA"] != "":
-                            print "NetName: " + _ret_["NetNameA"]
-                        if _ret_["NetNameU"] != "":
-                            print "NetName: " + _ret_["NetNameU"]
-                        if _ret_["DeviceNameA"] != "":
-                            print "DeviceName: " + _ret_["DeviceNameA"]
-                        if _ret_["DeviceNameU"] != "":
-                            print "DeviceName: " + _ret_["DeviceNameU"]
-                    elif _ret_["Type"] == "CommonPathSuffix":
-                        print "== CommonPathSuffix ==>\r\n"
-                        if _ret_["CommonPathSuffixU"] != "":
-                            print "CommonPathSuffix: " + _ret_["CommonPathSuffixU"]
-                        if _ret_["CommonPathSuffixA"] != "":
-                            print "CommonPathSuffix: " + _ret_["CommonPathSuffixA"]
-                    else:
-                        print "Unsupported"
-########################################################################
-#Read StringData
+    if LinkFlags & 0x1000:
+        gHasDarwinID = False
+    if LinkFlags & 0x2000:
+        gRunAsUser = False
+    if LinkFlags & 0x4000:
+        gHasExpIcon = False
+    if LinkFlags & 0x8000:
+        gNoPidlAlias = False
+    if LinkFlags & 0x20000:
+        gRunWithShimLayer = False
+    if LinkFlags & 0x40000:
+        gForceNoLinkTrack = False
+    if LinkFlags & 0x80000:
+        gEnableTargetMetadata = False
+    if LinkFlags & 0x100000:
+        gDisableLinkPathTracking = False
+    if LinkFlags & 0x200000:
+        gDisableKnownFolderTracking = False
+    if LinkFlags & 0x400000:
+        gDisableKnownFolderAlias = False
+    if LinkFlags & 0x800000:
+        gAllowLinkToLink = False
+    if LinkFlags & 0x1000000:
+        gUnaliasOnSave = False
+    if LinkFlags & 0x2000000:
+        gPreferEnvironmentPath = False
+    if LinkFlags & 0x4000000:
+        gKeepLocalIDListForUNCTarget = False
 
 
-if fConLen < Next + 2:
-    PrintSmallError()
-print "\r\n=========== \r\nNow parsing StringData\r\n"
 
-Name = ""  
-if gHasName == True:
-        #Read Name (Description string)
-        NameLenX = struct.unpack("H",fCon[Next:Next+2])[0]
-            
+    FileAttributes = struct.unpack("=L",ShellLinkHeader[0x18:0x1C])[0]
+    print "Target File Attributes: " + hex(FileAttributes) + " (" + ParseFileAttributes(FileAttributes)+ ")"
+
+
+    CreationTime = ShellLinkHeader[0x1C:0x24]
+    print "Creation Time: " + str( PrintFileTime(CreationTime) )
+    AccessTime = ShellLinkHeader[0x24:0x2C]
+    print "Access Time: " + str( PrintFileTime(AccessTime) )
+    WriteTime = ShellLinkHeader[0x2C:0x34]
+    print "Write Time: " + str( PrintFileTime(WriteTime) )
+
+    FileSize = struct.unpack("=L",ShellLinkHeader[0x34:0x38])[0]
+    print "File Size: " + str(FileSize) + " (" + hex(FileSize) + ") bytes"
+
+    IconIndex = struct.unpack("=L",ShellLinkHeader[0x38:0x3C])[0]
+    print "Icon Index: " + hex(IconIndex)
+
+    ShowCommand = struct.unpack("=L",ShellLinkHeader[0x3C:0x40])[0]
+    print "ShowCommand: " + PrintShowCommand(IconIndex)
+
+    HotKeyFlags = ShellLinkHeader[0x40:0x42]
+    print "HotKey flags: " + ParseHotKeyFlags(HotKeyFlags)
+
+    Reserved1 = ShellLinkHeader[0x42:0x44]
+    Reserved2 = ShellLinkHeader[0x44:0x48]
+    Reserved3 = ShellLinkHeader[0x48:0x4C]
+
+    ########################################################################
+    #Read LinkTargetIDList
+    Next = 0x4C
+    if gHasLinkTargetIDList == True:
+        print "\r\n=========== \r\nNow parsing TargetLinkIDList\r\n"
+        if fConLen < Next+2:
+            PrintSmallError()
+        IDListSize = struct.unpack("H",fCon[Next:Next+0x2])[0]
+        if  Next + IDListSize > fConLen:
+            PrintSmallError()
+        print "IDListSize: " + hex(IDListSize) + "\r\n"
         Next += 2
+        IDList = fCon[Next:Next+IDListSize]
+        IDs =  ParseIDList(IDList,IDListSize)
+        if IDs == []:
+            PrintFatalError("Error parsing TargetLinkIDList\r\n",-6)
+        #print IDs
+        for _ID_ in IDs:
+            x_x_x = _ID_.split("!!!")
+            if len(x_x_x) == 4:
+                print "ItemID Offset: "  + hex(int(x_x_x[0],10))
+                print "ItemID Size: "  + hex(int(x_x_x[1],10))
+                print "ItemID Type: "  + x_x_x[2]
+                print "ItemID Value: " + x_x_x[3]
+                print "\r\n"
+        Next += IDListSize
+    ########################################################################
+    #Read LinkInfo 
+    if gHasLinkInfo == True:
+        print "\r\n=========== \r\nNow parsing LinkInfo\r\n"
+        if fConLen < Next+4:
+            PrintSmallError()
+        LinkInfoSize = struct.unpack("=L",fCon[Next:Next+0x4])[0]
+        #print hex(Next)
+        #print hex(LinkInfoSize)
+        if fConLen < Next + LinkInfoSize:
+            PrintSmallError()
+        LinkInfo = fCon[Next:Next+LinkInfoSize]
+        Next += LinkInfoSize
+        LinkInfoHeaderSize = struct.unpack("=L",LinkInfo[4:8])[0]
+        if LinkInfoHeaderSize >= LinkInfoSize:
+            PrintSmallError()
+        LinkInfoHeader = LinkInfo[0:LinkInfoHeaderSize]
+        ret = ParseLinkInfo(LinkInfo,LinkInfoSize,LinkInfoHeader,LinkInfoHeaderSize)
+        #print ret
+        if ret == []:
+            print "Empty LinkInfo section\r\n"
+        else:
+            for _ret_ in ret:
+                if _ret_ != {}:
+                    if _ret_["Type"]!="":
+                        if _ret_["Type"] == "Volume":
+                            print "== Volume ==>\r\n"
+                            if _ret_["DriveType"] != "":
+                                xDT = _ret_["DriveType"]
+                                print "Drive Type: " + hex(xDT) + " (" + GetDriveTypeString(xDT) +")"
+                            if _ret_["VolumeA"] != "":
+                                print "Drive Name: " + _ret_["VolumeA"]
+                            if _ret_["VolumeU"] != "":
+                                print "Drive Name: " + _ret_["VolumeA"]
+                            if _ret_["DriveSerialNumber"] != "":
+                                xDSN = _ret_["DriveSerialNumber"]
+                                print "Drive SerialNo: " + hex(xDSN) + " (" + PrintDriveSerialNumber(xDSN) + ")"
+                        elif _ret_["Type"] == "LocalBasePath":
+                            print "== LocalBasePath ==>\r\n"
+                            if _ret_["LocalBasePathA"] != "":
+                                print "LocalBasePath: " + _ret_["LocalBasePathA"]
+                            if _ret_["LocalBasePathU"] != "":
+                                print "LocalBasePath: " + _ret_["LocalBasePathU"]
+                        elif _ret_["Type"] == "CommonNetworkRelativeLink":
+                            print "== CommonNetworkRelativeLink ==>\r\n"
+                            if _ret_["NetworkProviderType"] != 0:
+                                print "Network Provider: " + GetNetworkProviderString(NetworkProviderType)
+                            if _ret_["NetNameA"] != "":
+                                print "NetName: " + _ret_["NetNameA"]
+                            if _ret_["NetNameU"] != "":
+                                print "NetName: " + _ret_["NetNameU"]
+                            if _ret_["DeviceNameA"] != "":
+                                print "DeviceName: " + _ret_["DeviceNameA"]
+                            if _ret_["DeviceNameU"] != "":
+                                print "DeviceName: " + _ret_["DeviceNameU"]
+                        elif _ret_["Type"] == "CommonPathSuffix":
+                            print "== CommonPathSuffix ==>\r\n"
+                            if _ret_["CommonPathSuffixU"] != "":
+                                print "CommonPathSuffix: " + _ret_["CommonPathSuffixU"]
+                            if _ret_["CommonPathSuffixA"] != "":
+                                print "CommonPathSuffix: " + _ret_["CommonPathSuffixA"]
+                        else:
+                            print "Unsupported"
+    ########################################################################
+    #Read StringData
 
-        if gIsUnicode == True:
-            NameLenX += NameLenX
+
+    if fConLen < Next + 2:
+        PrintSmallError()
+    print "\r\n=========== \r\nNow parsing StringData\r\n"
+
+    Name = ""  
+    if gHasName == True:
+            #Read Name (Description string)
+            NameLenX = struct.unpack("H",fCon[Next:Next+2])[0]
+                
+            Next += 2
+
+            if gIsUnicode == True:
+                NameLenX += NameLenX
+            
+            if fConLen < Next + NameLenX:
+                PrintSmallError()
+            
+            NameX = fCon[Next:Next+NameLenX]
+            Next += NameLenX
+            
+            if gIsUnicode == False:
+                Name = NameX
+            else:
+                Name = NameX.decode("utf-16").encode("utf-8")
+            print "Name: " + Name
+            
+                
+    #Read RelativePath
+    if fConLen < Next + 2:
+        PrintSmallError()
+
+    RelativePath = ""  
+    if gHasRelativePath == True:
+            
+            RelativePathLenX = struct.unpack("H",fCon[Next:Next+2])[0]
+                
+            Next += 2
+
+            if gIsUnicode == True:
+                RelativePathLenX += RelativePathLenX
+            #print hex(RelativePathLenX)
+            if fConLen < Next + RelativePathLenX:
+                PrintSmallError()
+            
+            RelativePathX = fCon[Next:Next+RelativePathLenX]
+            Next += RelativePathLenX
+
+            if gIsUnicode == False:
+                RelativePath = RelativePathX
+            else:
+                RelativePath = RelativePathX.decode("utf-16").encode("utf-8")
+            print "Relative Path: " + RelativePath 
+            
+
+    #Read WorkingDir
+    if fConLen < Next + 2:
+        PrintSmallError()
+
+    WorkingDir = ""  
+    if gHasWorkingDir == True:
+            
+            WorkingDirLenX = struct.unpack("H",fCon[Next:Next+2])[0]
+                
+            Next += 2
+
+            if gIsUnicode == True:
+                WorkingDirLenX += WorkingDirLenX
+            #print hex(RelativePathLenX)
+            if fConLen < Next + WorkingDirLenX:
+                PrintSmallError()
+            
+            WorkingDirX = fCon[Next:Next+WorkingDirLenX]
+            Next += WorkingDirLenX
+
+            if gIsUnicode == False:
+                WorkingDir = WorkingDirX
+            else:
+                WorkingDir = WorkingDirX.decode("utf-16").encode("utf-8")
+            print "Working Dir: " + WorkingDir 
         
-        if fConLen < Next + NameLenX:
+
+    #Read Arguments
+    if fConLen < Next + 2:
+        PrintSmallError()
+
+    Arguments = ""  
+    if gHasArguments == True:
+            
+            ArgumentsLenX = struct.unpack("H",fCon[Next:Next+2])[0]
+                
+            Next += 2
+
+            if gIsUnicode == True:
+                ArgumentsLenX += ArgumentsLenX
+
+            if fConLen < Next + ArgumentsLenX:
+                PrintSmallError()
+            
+            ArgumentsX = fCon[Next:Next+ArgumentsLenX]
+            Next += ArgumentsLenX
+
+            if gIsUnicode == False:
+                Arguments = ArgumentsX
+            else:
+                Arguments = ArgumentsX.decode("utf-16").encode("utf-8")
+            print "Arguments: " + Arguments
+
+    #Read IconLocation
+    if fConLen < Next + 2:
+        PrintSmallError()
+
+    IconLocation = ""  
+    if gHasIconLocation == True:
+            
+            IconLocationLenX = struct.unpack("H",fCon[Next:Next+2])[0]
+                
+            Next += 2
+
+            if gIsUnicode == True:
+                IconLocationLenX += IconLocationLenX
+
+            if fConLen < Next + IconLocationLenX:
+                PrintSmallError()
+            
+            IconLocationX = fCon[Next:Next+IconLocationLenX]
+            Next += IconLocationLenX
+
+            if gIsUnicode == False:
+                IconLocation = IconLocationX
+            else:
+                IconLocation = IconLocationX.decode("utf-16").encode("utf-8")
+            print "IconLocation: " + IconLocation
+
+    ########################################################################
+    #Read ExtraData
+    print "\r\n=========== \r\nNow parsing ExtraData\r\n"
+    TerminalBlockFound = False
+
+    BlockNum = 0
+    while TerminalBlockFound == False:
+        #print "Next: " + hex(Next)
+        if fConLen < Next + 4:
+            PrintSmallError()
+        BlockSize = struct.unpack("=L",fCon[Next:Next+4])[0]
+        #print "Block Size: " + hex(BlockSize)
+        #Check for Terminal Block
+        if BlockSize == 0:
+            TerminalBlockFound = True
+            print "Terminal Block found\r\n"
+            break
+        print "DataBlock No. ===> " + str(BlockNum)
+        if fConLen < Next + BlockSize:
             PrintSmallError()
         
-        NameX = fCon[Next:Next+NameLenX]
-        Next += NameLenX
+        BlockSignature = struct.unpack("=L",fCon[Next+4:Next+8])[0]
+        print "Block Signaure: " + hex(BlockSignature) + " (" + GetNameFromSignatureId(BlockSignature) + ")"
+        #print GetNameFromSignatureId(BlockSignature)
+
+        DataBlock = fCon[Next:Next+BlockSize]
+        ret = ParseDataBlock(DataBlock,BlockSize,BlockSignature)
         
-        if gIsUnicode == False:
-            Name = NameX
-        else:
-            Name = NameX.decode("utf-16").encode("utf-8")
-        print "Name: " + Name
-        
-            
-#Read RelativePath
-if fConLen < Next + 2:
-    PrintSmallError()
-
-RelativePath = ""  
-if gHasRelativePath == True:
-        
-        RelativePathLenX = struct.unpack("H",fCon[Next:Next+2])[0]
-            
-        Next += 2
-
-        if gIsUnicode == True:
-            RelativePathLenX += RelativePathLenX
-        #print hex(RelativePathLenX)
-        if fConLen < Next + RelativePathLenX:
-            PrintSmallError()
-        
-        RelativePathX = fCon[Next:Next+RelativePathLenX]
-        Next += RelativePathLenX
-
-        if gIsUnicode == False:
-            RelativePath = RelativePathX
-        else:
-            RelativePath = RelativePathX.decode("utf-16").encode("utf-8")
-        print "Relative Path: " + RelativePath 
-        
-
-#Read WorkingDir
-if fConLen < Next + 2:
-    PrintSmallError()
-
-WorkingDir = ""  
-if gHasWorkingDir == True:
-        
-        WorkingDirLenX = struct.unpack("H",fCon[Next:Next+2])[0]
-            
-        Next += 2
-
-        if gIsUnicode == True:
-            WorkingDirLenX += WorkingDirLenX
-        #print hex(RelativePathLenX)
-        if fConLen < Next + WorkingDirLenX:
-            PrintSmallError()
-        
-        WorkingDirX = fCon[Next:Next+WorkingDirLenX]
-        Next += WorkingDirLenX
-
-        if gIsUnicode == False:
-            WorkingDir = WorkingDirX
-        else:
-            WorkingDir = WorkingDirX.decode("utf-16").encode("utf-8")
-        print "Working Dir: " + WorkingDir 
-    
-
-#Read Arguments
-if fConLen < Next + 2:
-    PrintSmallError()
-
-Arguments = ""  
-if gHasArguments == True:
-        
-        ArgumentsLenX = struct.unpack("H",fCon[Next:Next+2])[0]
-            
-        Next += 2
-
-        if gIsUnicode == True:
-            ArgumentsLenX += ArgumentsLenX
-
-        if fConLen < Next + ArgumentsLenX:
-            PrintSmallError()
-        
-        ArgumentsX = fCon[Next:Next+ArgumentsLenX]
-        Next += ArgumentsLenX
-
-        if gIsUnicode == False:
-            Arguments = ArgumentsX
-        else:
-            Arguments = ArgumentsX.decode("utf-16").encode("utf-8")
-        print "Arguments: " + Arguments
-
-#Read IconLocation
-if fConLen < Next + 2:
-    PrintSmallError()
-
-IconLocation = ""  
-if gHasIconLocation == True:
-        
-        IconLocationLenX = struct.unpack("H",fCon[Next:Next+2])[0]
-            
-        Next += 2
-
-        if gIsUnicode == True:
-            IconLocationLenX += IconLocationLenX
-
-        if fConLen < Next + IconLocationLenX:
-            PrintSmallError()
-        
-        IconLocationX = fCon[Next:Next+IconLocationLenX]
-        Next += IconLocationLenX
-
-        if gIsUnicode == False:
-            IconLocation = IconLocationX
-        else:
-            IconLocation = IconLocationX.decode("utf-16").encode("utf-8")
-        print "IconLocation: " + IconLocation
-
-########################################################################
-#Read ExtraData
-print "\r\n=========== \r\nNow parsing ExtraData\r\n"
-TerminalBlockFound = False
-
-BlockNum = 0
-while TerminalBlockFound == False:
-    #print "Next: " + hex(Next)
-    if fConLen < Next + 4:
-        PrintSmallError()
-    BlockSize = struct.unpack("=L",fCon[Next:Next+4])[0]
-    #print "Block Size: " + hex(BlockSize)
-    #Check for Terminal Block
-    if BlockSize == 0:
-        TerminalBlockFound = True
-        print "Terminal Block found\r\n"
-        break
-    print "DataBlock No. ===> " + str(BlockNum)
-    if fConLen < Next + BlockSize:
-        PrintSmallError()
-    
-    BlockSignature = struct.unpack("=L",fCon[Next+4:Next+8])[0]
-    print "Block Signaure: " + hex(BlockSignature) + " (" + GetNameFromSignatureId(BlockSignature) + ")"
-    #print GetNameFromSignatureId(BlockSignature)
-
-    DataBlock = fCon[Next:Next+BlockSize]
-    ret = ParseDataBlock(DataBlock,BlockSize,BlockSignature)
-    
-    Next += BlockSize
-    BlockNum += 1
+        Next += BlockSize
+        BlockNum += 1
 
 
 
 
-if TerminalBlockFound == True:
-    print "Done successfully\r\n"
-sys.exit(0)
+    if TerminalBlockFound == True:
+        print "Done successfully\r\n"
+    sys.exit(0)
